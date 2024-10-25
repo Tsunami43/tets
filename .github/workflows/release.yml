@@ -44,7 +44,7 @@ jobs:
       uses: actions/upload-artifact@v3
       with:
         name: built-installer
-        path: output/  # Папка, где создается ваш установщик
+        path: dist/  # Папка, где создается ваш установщик
 
     - name: Download artifact
       uses: actions/download-artifact@v3
