@@ -1,0 +1,84 @@
+name: Build and Upload .exe
+
+on:
+  release:
+    types: [published]
+    branches:
+      - main  # Указываем, что релизы должны срабатывать только для ветки main
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.x'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name: Build executable
+      run: |
+        pip install pyinstaller
+        # Получаем версию релиза
+        $version = "${{ github.event.release.tag_name }}"
+        # Устанавливаем имя файла с версией
+        pyinstaller --onefile --noconsole --name "stickers_$version" --icon=assets\icon.ico stickers.py
+
+    - name: Archive built .exe
+      uses: actions/upload-artifact@v3
+      with:
+        name: built-exe
+        path: dist/
+
+    - name: Build Installer
+      run: |
+        # Убедитесь, что Inno Setup доступен в системе
+        $version = "${{ github.event.release.tag_name }}"
+        # Создание установщика
+        "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" setup.iss
+
+    - name: Archive built installer
+      uses: actions/upload-artifact@v3
+      with:
+        name: built-installer
+        path: output/  # Папка, где создается ваш установщик
+
+    - name: Download artifact
+      uses: actions/download-artifact@v3
+      with:
+        name: built-exe
+        path: ./dist
+
+    - name: Send release to API via webhook
+      shell: pwsh
+      run: |
+        $version = "${{ github.event.release.tag_name }}"
+        $headers = @{
+          Authorization = "Bearer ${{ secrets.API_TOKEN }}"
+          "X-Secret-Key" = "${{ secrets.SECRET_KEY }}"
+        }
+        $form = @{
+          file_exe = Get-Item -Path "./dist/stickers_$version.exe"
+          file_setup = Get-Item -Path "./dist/StickersInstaller.exe"  # Укажите путь к установщику
+          version = $version
+        }
+        Invoke-RestMethod -Uri "https://5aec-46-8-62-224.ngrok-free.app/update" -Method Post -Headers $headers -Form $form
+
+    - name: Upload release to GitHub
+      uses: softprops/action-gh-release@v1
+      with:
+        tag_name: ${{ github.event.release.tag_name }}
+        files: |
+          ./dist/stickers_${{ github.event.release.tag_name }}.exe
+          ./dist/StickersInstaller.exe  # Загрузите установщик
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
