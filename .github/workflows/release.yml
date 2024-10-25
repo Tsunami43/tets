@@ -40,10 +40,8 @@ jobs:
 
     - name: Build Installer
       run: |
-        # Убедитесь, что Inno Setup доступен в системе
         $version = "${{ github.event.release.tag_name }}"
-        # Создание установщика
-        "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" setup.iss
+        & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" "setup.iss"
 
     - name: Archive built installer
       uses: actions/upload-artifact@v3
