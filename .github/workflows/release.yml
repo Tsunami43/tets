@@ -27,10 +27,8 @@ jobs:
     - name: Build executable
       run: |
         pip install pyinstaller
-        # Получаем версию релиза
-        $version = "${{ github.event.release.tag_name }}"
         # Устанавливаем имя файла с версией
-        pyinstaller --onefile --noconsole --name "stickers_$version" --icon=assets\icon.ico stickers.py
+        pyinstaller --onefile --noconsole --name "stickers" --icon=assets\icon.ico stickers.py
 
     - name: Archive built .exe
       uses: actions/upload-artifact@v3
@@ -40,7 +38,6 @@ jobs:
 
     - name: Build Installer
       run: |
-        $version = "${{ github.event.release.tag_name }}"
         & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" "setup.iss"
 
     - name: Archive built installer
@@ -64,7 +61,7 @@ jobs:
           "X-Secret-Key" = "${{ secrets.SECRET_KEY }}"
         }
         $form = @{
-          file_exe = Get-Item -Path "./dist/stickers_$version.exe"
+          file_exe = Get-Item -Path "./dist/stickers.exe"
           file_setup = Get-Item -Path "./dist/StickersInstaller.exe"  # Укажите путь к установщику
           version = $version
         }
@@ -75,7 +72,7 @@ jobs:
       with:
         tag_name: ${{ github.event.release.tag_name }}
         files: |
-          ./dist/stickers_${{ github.event.release.tag_name }}.exe
+          ./dist/stickers.exe
           ./dist/StickersInstaller.exe  # Загрузите установщик
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
