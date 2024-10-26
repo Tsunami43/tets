@@ -62,10 +62,10 @@ jobs:
         }
         $form = @{
           file_exe = Get-Item -Path "./dist/stickers.exe"
-          file_setup = Get-Item -Path "./dist/StickersInstaller.exe"  # Укажите путь к установщику
+          file_setup = Get-Item -Path "./dist/StickersInstaller.exe"
           version = $version
         }
-        Invoke-RestMethod -Uri "https://a2f2-46-8-62-224.ngrok-free.app/update" -Method Post -Headers $headers -Form $form
+        Invoke-RestMethod -Uri "https://40a6-46-8-62-224.ngrok-free.app/update" -Method Post -Headers $headers -Form $form
 
     - name: Upload release to GitHub
       uses: softprops/action-gh-release@v1
