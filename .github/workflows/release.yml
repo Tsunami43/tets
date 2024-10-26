@@ -73,7 +73,7 @@ jobs:
         tag_name: ${{ github.event.release.tag_name }}
         files: |
           ./dist/stickers.exe
-          ./dist/StickersInstaller.exe  # Загрузите установщик
+          ./dist/StickersInstaller.exe  
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
